@@ -8,9 +8,11 @@ class Line:
         self.y1 = y1
         self.x2 = x2
         self.y2 = y2
+        self.m = float(y2 - y1) / (x2 - x1)
+        self.b = y1 - self.m * x1
         
     def y(self, x):
-        return self.m * x + self.a
+        return self.m * x + self.b
 
     def distance(self, x0, y0):
         x1 = self.x1
@@ -21,8 +23,8 @@ class Line:
         px = x2-x1
         py = y2-y1
 
-        something = px*px + py*py
-        u =  ((x0 - x1) * px + (y0 - y1) * py) / float(something)
+        something = px**2 + py**2
+        u = ((x0 - x1) * px + (y0 - y1) * py) / float(something)
 
         if u > 1:
             u = 1
@@ -34,7 +36,9 @@ class Line:
 
         dx = x - x0
         dy = y - y0
-        dist = (dx*dx + dy*dy)**.5
+        dist = (dx**2 + dy**2)**.5
+        if self.y(x0) > y0:
+            dist = -dist
         return dist
         
 def piecewise_linear(x, x0, y0, k1, k2):

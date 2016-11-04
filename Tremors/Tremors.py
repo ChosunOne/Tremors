@@ -21,7 +21,7 @@ magnitudes = []
 types = []
 
 # For debug, just do the following number of lines
-LINECOUNT = 30000
+LINECOUNT = 90000
 
 for file in glob.glob('JMA*.txt'):
     count = 0
@@ -107,18 +107,32 @@ for i in range(0, len(latitudes)):
         eventTypes[closestLine] += [types[i]]
         eventMagnitudes[closestLine] += [magnitudes[i]]
 
+
+#Output data to files
+s = pd.Series(distances[1])
+s.to_csv('zone1_distances.csv')
+
+
 fig = plt.figure()
 ax = fig.add_subplot(111)
-ax.set_title('Tremor Zones')
-ax.set_xlabel('Longitude (°)')
-ax.set_ylabel('Latitude (°)')
+#ax.set_title('Tremor Zones')
+#ax.set_xlabel('Longitude (°)')
+#ax.set_ylabel('Latitude (°)')
+
+zone = -1
+
+ax.set_title('Tremor Distances ' + str(zone))
+ax.set_xlabel('Date')
+ax.set_ylabel('Distance (°)')
+
+
 
 #distanceKTSeries = pd.Series(distancesKT, dates)
 #distancesKTRollingMean = distanceKTSeries.rolling(center=False, window=1400).mean()
 #distancesKTExpRollingMean = distanceKTSeries.ewm(span=1400).mean()
 
-#plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y/%m/%d %H:%M:%S'))
-#plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=7))
+plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y/%m/%d %H:%M:%S'))
+plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=7))
 
 #plt.scatter(dates, distancesKT)
 #plt.scatter(dates, distancesKTRollingMean)
@@ -126,10 +140,13 @@ ax.set_ylabel('Latitude (°)')
 #plt.scatter(longitudes, latitudes)
 #plt.scatter(eventLongitudes[1], eventLatitudes[1])
 colors = cm.rainbow(np.linspace(0, 1, len(geoLines)))
-for l in range(0, len(geoLines)):
-    ax.scatter(eventLongitudes[l], eventLatitudes[l], color = colors[l])
 
-ax.plot(xd, yinterp(xd), color='k', linestyle='-', linewidth=3)
+#ax.scatter(eventDates[zone], distances[zone], color = colors[zone])
+
+for l in range(0, len(geoLines)):
+    ax.scatter(eventDates[l], distances[l], s = 3 * eventMagnitudes[l], color = colors[l])
+
+#ax.plot(xd, yinterp(xd), color='k', linestyle='-', linewidth=3)
 
 #plt.gcf().autofmt_xdate()
 plt.show()
