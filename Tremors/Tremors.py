@@ -8,7 +8,9 @@ import pandas as pd
 import os 
 import datetime as dt
 import random
+
 import modules.analysis as analysis
+import modules.plots as plots
 
 pattern = "%Y/%m/%d %H:%M:%S"
 os.environ['TZ'] = 'UTC'
@@ -70,14 +72,19 @@ xd = np.linspace(125, 153, 7)
 yinterp = interp1d(longitudes, latitudes)
 
 geoLines = []
-for x in xd:
-    if x != xd[-1]:
-        x1 = x  
-        y1 = yinterp(x1).tolist()
+segments = 5
+for x1 in xd:
+    if x1 != xd[-1]:  
         x2 = xd[np.where(xd==x1)[0][0] + 1]
-        y2 = yinterp(x2).tolist()
-        geoLine = analysis.Line(x1, y1, x2, y2)
-        geoLines += [geoLine]
+        xs = np.linspace(x1, x2, segments)
+        
+        for xSegment1 in xs:
+            if xSegment1 != xs[-1]:
+                xSegment2 = xs[np.where(xs==xSegment1)[0][0] + 1]
+                y1 = yinterp(xSegment1).tolist()
+                y2 = yinterp(xSegment2).tolist()
+                geoLine = analysis.Line(xSegment1, y1, xSegment2, y2)
+                geoLines += [geoLine]
 
 # Calculated Data
 distances = [[] for x in range(0, len(geoLines))]
@@ -113,40 +120,7 @@ s = pd.Series(distances[1])
 s.to_csv('zone1_distances.csv')
 
 
-fig = plt.figure()
-ax = fig.add_subplot(111)
-#ax.set_title('Tremor Zones')
-#ax.set_xlabel('Longitude (°)')
-#ax.set_ylabel('Latitude (°)')
+plots.plotZones(eventLatitudes, eventLongitudes, len(geoLines), xd, yinterp)
 
-zone = -1
-
-ax.set_title('Tremor Distances ' + str(zone))
-ax.set_xlabel('Date')
-ax.set_ylabel('Distance (°)')
-
-
-
-#distanceKTSeries = pd.Series(distancesKT, dates)
-#distancesKTRollingMean = distanceKTSeries.rolling(center=False, window=1400).mean()
-#distancesKTExpRollingMean = distanceKTSeries.ewm(span=1400).mean()
-
-plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y/%m/%d %H:%M:%S'))
-plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=7))
-
-#plt.scatter(dates, distancesKT)
-#plt.scatter(dates, distancesKTRollingMean)
-#plt.scatter(dates, distancesKTExpRollingMean)
-#plt.scatter(longitudes, latitudes)
-#plt.scatter(eventLongitudes[1], eventLatitudes[1])
-colors = cm.rainbow(np.linspace(0, 1, len(geoLines)))
-
-#ax.scatter(eventDates[zone], distances[zone], color = colors[zone])
-
-for l in range(0, len(geoLines)):
-    ax.scatter(eventDates[l], distances[l], s = 3 * eventMagnitudes[l], color = colors[l])
-
-#ax.plot(xd, yinterp(xd), color='k', linestyle='-', linewidth=3)
-
-#plt.gcf().autofmt_xdate()
-plt.show()
+for z in range(0, len(geoLines)):
+    plots.plotZone(eventDates[z], distances[z], magnitudes[z], len(geoLines), z)
