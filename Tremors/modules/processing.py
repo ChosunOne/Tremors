@@ -3,7 +3,7 @@ import datetime as dt
 import random
 import numpy as np
 from scipy.interpolate import interp1d
-import analysis
+import modules.analysis
 
 def readTremorData(startTime, endTime, file):
     pattern = "%Y/%m/%d %H:%M:%S"
@@ -72,21 +72,85 @@ def createGeoLines(segments, sections, data):
                 geoLine = analysis.Line(xSection1, line.y(xSection1), xSection2, line.y(xSection2))
                 geoLines += [geoLine]
 
-    return geoLines
+    return geoLines, xd, yinterp
 
 def processTremorData(data, geoLines):
     length = len(geoLines)
     eventParaDist = [[] for x in range(0, length)]
     eventPerpDist = [[] for x in range(0, length)]
-    eventDates = [[] for x in range(0, length)]
-    eventLatitudes = [[] for x in range(0, length)]
-    eventLongitudes = [[] for x in range(0, length)]
-    eventDepths = [[] for x in range(0, length)]
-    eventMagnitudes = [[] for x in range(0, length)]
-    eventTypes = [[] for x in range(0, length)]
+
+    eventParaDates = [[] for x in range(0, length)]
+    eventPerpDates = [[] for x in range(0, length)]
+
+    eventParaLatitudes = [[] for x in range(0, length)]
+    eventPerpLatitudes = [[] for x in range(0, length)]
+
+    eventParaLongitudes = [[] for x in range(0, length)]
+    eventPerpLongitudes = [[] for x in range(0, length)]
+
+    eventParaDepths = [[] for x in range(0, length)]
+    eventPerpDepths = [[] for x in range(0, length)]
+
+    eventParaMagnitudes = [[] for x in range(0, length)]
+    eventPerpMagnitudes = [[] for x in range(0, length)]
+
+    eventParaTypes = [[] for x in range(0, length)]
+    eventPerpTypes = [[] for x in range(0, length)]
     inf = np.inf
 
     perpGeoLines = []
     for line in geoLines:
         length = ((line.x2 - line.x1)**2 + (line.y2 - line.y1)**2)**.5
+        lineUnitVector = ((line.x2 - line.x1) / length, (line.y2 - line.y1) / length)
+        perpLineUnitVector = (lineUnitVector[1] * -1, lineUnitVector[0])
+        midpoint = ((line.x2 - line.x1) / 2, (line.y2 - line.y1) / 2)
+        perpLineX = (midpoint[0] + -1. * length / 2. * perpLineUnitVector, midpoint[0] + length / 2. * perpLineUnitVector) 
+        perpLineY = (midpoint[1] + -1. * length / 2. * perpLineUnitVector, midpoint[1] + length / 2. * perpLineUnitVector)
+        perpLine = analysis.Line(perpLineX[0], perpLineY[0], perpLineX[1], perpLineY[1])
+        perpGeoLines += [perpLine]
+
+    for i in range(0, len(data["latitudes"])):
+        shortestParaDist = inf
+        shortestPerpDist = inf
+        closestParaLine = 0
+        closestPerpLine = 0
+        for l in geoLines:
+            dist = l.distance(data["longitudes"][i], data["latitudes"][i])
+            if abs(dist) < abs(shortestParaDist):
+                shortestParaDist = dist
+                closestParaLine = geoLines.index(l)
+
+        for l in perpGeoLines:
+            dist = l.distance(data["longitudes"][i], data["latitudes"][i])
+            if abs(dist) < abs(shortestPerpDist):
+                shortestPerpDist = dist
+                closestPerpLine = perpGeoLines.index(l)
+
+        if abs(shortestParaDist) < 5 or abs(shortestPerpDist) < 5:
+            eventParaDist[closestParaLine] += [shortestParaDist]
+            eventPerpDist[closestPerpLine] += [shortestPerpDist]
+            
+            eventParaDates[closestParaLine] += [data["dates"][i]]
+            eventPerpDates[closestPerpLine] += [data["dates"][i]]
+
+            eventParaLatitudes[closestParaLine] += [data["latitudes"][i]]
+            eventPerpLatitudes[closestPerpLine] += [data["latitudes"][i]]
+
+            eventParaLongitudes[closestParaLine] += [data["longitudes"][i]]
+            eventPerpLongitudes[closestPerpLine] += [data["longitudes"][i]]
+
+            eventParaDepths[closestParaLine] += [data["depths"][i]]
+            eventPerpDepths[closestPerpLine] += [data["depths"][i]]
+
+            eventParaTypes[closestParaLine] += [data["types"][i]]
+            eventPerpTypes[closestPerpLine] += [data["types"][i]]
+
+            eventParaMagnitudes[closestParaLine] += [data["types"][i]]
+            eventPerpMagnitudes[closestPerpLine] += [data["types"][i]]
+
+    procData = {"parallel": {"distances":eventParaDist, "dates":eventParaDates, "latitudes":eventParaLatitudes, "longitudes":eventParaLongitudes, "depths":eventParaDepths, "types":eventParaTypes, "magnitudes":eventParaMagnitudes},
+                "perpendicular": {"distances":eventPerpDist, "dates":eventPerpDates, "latitudes":eventPerpLatitudes, "longitude":eventPerpLongitudes, "depths":eventPerpDepths, "types":eventPerpTypes, "magnitudes":eventPerpMagnitudes}}
+
+    return procData
+    
         
