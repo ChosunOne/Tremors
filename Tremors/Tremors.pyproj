@@ -30,6 +30,9 @@
     <Compile Include="modules\plots.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="modules\processing.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="modules\__init__.py">
       <SubType>Code</SubType>
     </Compile>
