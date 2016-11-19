@@ -3,7 +3,7 @@ import datetime as dt
 import random
 import numpy as np
 from scipy.interpolate import interp1d
-import modules.analysis
+import modules.analysis as analysis
 
 def readTremorData(startTime, endTime, file):
     pattern = "%Y/%m/%d %H:%M:%S"
@@ -17,7 +17,27 @@ def readTremorData(startTime, endTime, file):
     types = []
 
     with open(file, 'r') as f:
-        for line in f:
+        lines = f.readlines()[3:]
+        slines = lines
+        # Find starting point
+        startLine = lines[0].split()
+        date = dt.datetime.strptime(startLine[0] + " " + startLine[1][:-3], pattern)
+        index = 0
+        while abs((date - startTime)) > dt.timedelta(1):
+            if date < startTime:
+                slines = slines[index:]
+                index = int(len(slines) / 2)
+                startLine = slines[index].split()
+                date = dt.datetime.strptime(startLine[0] + " " + startLine[1][:-3], pattern)
+            else:
+                slines = slines[:index]
+                index = int(len(slines) / 2)
+                startLine = slines[index].split()
+                date = dt.datetime.strptime(startLine[0] + " " + startLine[1][:-3], pattern)
+                
+        lines = lines[lines.index(slines[index]):]
+
+        for line in lines:
             if line[0] == '#':
                     continue
             
@@ -29,6 +49,10 @@ def readTremorData(startTime, endTime, file):
     
             date = line[0] + " " + line[1][:-3]
             date = dt.datetime.strptime(date, pattern)
+
+            if random.randint(1, 1000) <= 1:
+                os.system('cls')
+                print(line[0], "read") 
 
             if date < startTime:
                 continue
@@ -45,9 +69,7 @@ def readTremorData(startTime, endTime, file):
             else:
                 types += [0]
 
-            if random.randint(1, 1000) <= 1:
-                    os.system('cls')
-                    print(line[0], "read") 
+
     
     dates = np.array(dates)
     latitudes = np.array(latitudes)
@@ -63,14 +85,15 @@ def createGeoLines(segments, sections, data):
     yinterp = interp1d(data["longitudes"], data["latitudes"])
     geoLines = []
     for x1 in xd:
-        x2 = xd[np.where(xd==x1)[0][0] + 1]
-        xs = np.linspace(x1, x2, sections)
-        line = analysis.Line(x1, yinterp(x1), x2, yinterp(x2))
-        for xSection1 in xs:
-            if xSection1 != xs[-1]:
-                xSection2 = xs[np.where(xs==xSection1)[0][0] + 1]
-                geoLine = analysis.Line(xSection1, line.y(xSection1), xSection2, line.y(xSection2))
-                geoLines += [geoLine]
+        if x1 != xd[-1]:
+            x2 = xd[np.where(xd==x1)[0][0] + 1]
+            xs = np.linspace(x1, x2, sections)
+            line = analysis.Line(x1, yinterp(x1).tolist(), x2, yinterp(x2).tolist())
+            for xSection1 in xs:
+                if xSection1 != xs[-1]:
+                    xSection2 = xs[np.where(xs==xSection1)[0][0] + 1]
+                    geoLine = analysis.Line(xSection1, line.y(xSection1), xSection2, line.y(xSection2))
+                    geoLines += [geoLine]
 
     return geoLines, xd, yinterp
 
@@ -103,9 +126,9 @@ def processTremorData(data, geoLines):
         length = ((line.x2 - line.x1)**2 + (line.y2 - line.y1)**2)**.5
         lineUnitVector = ((line.x2 - line.x1) / length, (line.y2 - line.y1) / length)
         perpLineUnitVector = (lineUnitVector[1] * -1, lineUnitVector[0])
-        midpoint = ((line.x2 - line.x1) / 2, (line.y2 - line.y1) / 2)
-        perpLineX = (midpoint[0] + -1. * length / 2. * perpLineUnitVector, midpoint[0] + length / 2. * perpLineUnitVector) 
-        perpLineY = (midpoint[1] + -1. * length / 2. * perpLineUnitVector, midpoint[1] + length / 2. * perpLineUnitVector)
+        midpoint = ((line.x2 + line.x1) / 2, (line.y2 + line.y1) / 2)
+        perpLineX = (midpoint[0] + -1. * length / 2. * perpLineUnitVector[0], midpoint[0] + length / 2. * perpLineUnitVector[0]) 
+        perpLineY = (midpoint[1] + -1. * length / 2. * perpLineUnitVector[1], midpoint[1] + length / 2. * perpLineUnitVector[1])
         perpLine = analysis.Line(perpLineX[0], perpLineY[0], perpLineX[1], perpLineY[1])
         perpGeoLines += [perpLine]
 
@@ -148,8 +171,12 @@ def processTremorData(data, geoLines):
             eventParaMagnitudes[closestParaLine] += [data["types"][i]]
             eventPerpMagnitudes[closestPerpLine] += [data["types"][i]]
 
+        if random.randint(1, 1000) <= 1:
+            os.system('cls')
+            print(data["dates"][i], "processed") 
+
     procData = {"parallel": {"distances":eventParaDist, "dates":eventParaDates, "latitudes":eventParaLatitudes, "longitudes":eventParaLongitudes, "depths":eventParaDepths, "types":eventParaTypes, "magnitudes":eventParaMagnitudes},
-                "perpendicular": {"distances":eventPerpDist, "dates":eventPerpDates, "latitudes":eventPerpLatitudes, "longitude":eventPerpLongitudes, "depths":eventPerpDepths, "types":eventPerpTypes, "magnitudes":eventPerpMagnitudes}}
+                "perpendicular": {"distances":eventPerpDist, "dates":eventPerpDates, "latitudes":eventPerpLatitudes, "longitudes":eventPerpLongitudes, "depths":eventPerpDepths, "types":eventPerpTypes, "magnitudes":eventPerpMagnitudes}}
 
     return procData
     

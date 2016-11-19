@@ -6,7 +6,7 @@ import datetime as dt
 pattern = "%Y/%m/%d %H:%M:%S"
 
 startTime = dt.datetime.strptime("2012/01/01 00:00:00", pattern)
-endTime = dt.datetime.strptime("2012/12/31 00:00:00", pattern)
+endTime = dt.datetime.strptime("2012/3/29 00:00:00", pattern)
 
 data = processing.readTremorData(startTime, endTime, "JMA_2001_2013_Japan.txt")
 geoLines, xd, yinterp = processing.createGeoLines(7, 10, data)
