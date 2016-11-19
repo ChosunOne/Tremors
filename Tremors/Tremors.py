@@ -8,11 +8,16 @@ pattern = "%Y/%m/%d %H:%M:%S"
 startTime = dt.datetime.strptime("2012/01/01 00:00:00", pattern)
 endTime = dt.datetime.strptime("2012/3/29 00:00:00", pattern)
 
-data = processing.readTremorData(startTime, endTime, "JMA_2001_2013_Japan.txt")
-geoLines, xd, yinterp = processing.createGeoLines(7, 10, data)
+#data = processing.readTremorData(startTime, endTime, "JMA_2001_2013_Japan.txt", "%Y/%m/%d %H:%M:%S")
+data = processing.readTremorData(startTime, endTime, "trm_Nankai.20120101.0090.154912263.csv", "%Y-%m-%d %H:%M")
+geoLines, xd, yinterp = processing.createGeoLines(6, 5, data)
 procData = processing.processTremorData(data, geoLines)
 
-plots.plotZones(procData["perpendicular"]["latitudes"], procData["perpendicular"]["longitudes"], 7, xd, yinterp)
+plots.plotZones(procData["perpendicular"]["latitudes"], procData["perpendicular"]["longitudes"], xd, yinterp)
+zones = len(procData["perpendicular"]["dates"])
+for i in range(0, zones):
+    plots.plotZone(procData["perpendicular"]["dates"][i], procData["perpendicular"]["distances"][i], procData["perpendicular"]["magnitudes"][i], zones, i, "Tremor Distances " + str(i) + " Perp")
+    plots.plotZone(procData["parallel"]["dates"][i], procData["parallel"]["distances"][i], procData["parallel"]["magnitudes"][i], zones, i, "Tremor Distances " + str(i) + " Para")
 
 
 

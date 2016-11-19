@@ -3,7 +3,8 @@ import matplotlib.dates as mdates
 import matplotlib.cm as cm
 import numpy as np
 
-def plotZones(latitudes, longitudes, zones, xd, yinterp):
+def plotZones(latitudes, longitudes, xd, yinterp):
+    zones = len(latitudes)
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.set_title('Tremor Zones')
@@ -17,13 +18,14 @@ def plotZones(latitudes, longitudes, zones, xd, yinterp):
 
     ax.plot(xd, yinterp(xd), color='k', linestyle='-', linewidth=3)
 
-    plt.show()
+    fig.savefig("../images/zone map.png")
+    plt.close(fig)
 
-def plotZone(dates, distances, magnitudes, zones, zone):
+def plotZone(dates, distances, magnitudes, zones, zone, title):
     fig = plt.figure()
     ax = fig.add_subplot(111)
     
-    ax.set_title('Tremor Distances ' + str(zone))
+    ax.set_title(title)
     ax.set_xlabel('Date')
     ax.set_ylabel('Distance ')
 
@@ -33,4 +35,5 @@ def plotZone(dates, distances, magnitudes, zones, zone):
     colors = cm.rainbow(np.linspace(0, 1, zones))
     ax.scatter(dates, distances, color = colors[zone])
 
-    plt.show()
+    fig.savefig("../images/" + title + ".png")
+    plt.close(fig)

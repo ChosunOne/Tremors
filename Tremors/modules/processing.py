@@ -5,8 +5,7 @@ import numpy as np
 from scipy.interpolate import interp1d
 import modules.analysis as analysis
 
-def readTremorData(startTime, endTime, file):
-    pattern = "%Y/%m/%d %H:%M:%S"
+def readTremorData(startTime, endTime, file, pattern):
     os.environ['TZ'] = 'UTC'
 
     dates = []
@@ -20,19 +19,28 @@ def readTremorData(startTime, endTime, file):
         lines = f.readlines()[3:]
         slines = lines
         # Find starting point
-        startLine = lines[0].split()
+        if ".csv" in file:
+            startLine = lines[0].split(",")
+        else:
+            startLine = lines[0].split()
         date = dt.datetime.strptime(startLine[0] + " " + startLine[1][:-3], pattern)
         index = 0
         while abs((date - startTime)) > dt.timedelta(1):
             if date < startTime:
                 slines = slines[index:]
                 index = int(len(slines) / 2)
-                startLine = slines[index].split()
+                if ".csv" in file:
+                    startLine = slines[index].split(",")
+                else:
+                    startLine = slines[index].split()
                 date = dt.datetime.strptime(startLine[0] + " " + startLine[1][:-3], pattern)
             else:
                 slines = slines[:index]
                 index = int(len(slines) / 2)
-                startLine = slines[index].split()
+                if ".csv" in file:
+                    startLine = slines[index].split(",")
+                else:
+                    startLine = slines[index].split()
                 date = dt.datetime.strptime(startLine[0] + " " + startLine[1][:-3], pattern)
                 
         lines = lines[lines.index(slines[index]):]
@@ -41,7 +49,13 @@ def readTremorData(startTime, endTime, file):
             if line[0] == '#':
                     continue
             
-            line = line.split()
+            if ".csv" in file:
+                line = line.split(",")
+            else:
+                line = line.split()
+            
+            if len(line) != 9:
+                continue
 
             #Check if in bounding box
             if float(line[2]) < 26 or float(line[3]) < 123 or float(line[2]) > 48 or float(line[3]) > 154:
@@ -81,14 +95,18 @@ def readTremorData(startTime, endTime, file):
     return {"dates":dates, "latitudes":latitudes, "longitudes":longitudes, "depths":depths, "magnitudes":magnitudes, "types":types}
 
 def createGeoLines(segments, sections, data):
-    xd = np.linspace(125, 153, segments)
+    xmin = min(data["longitudes"])
+    xmax = max(data["longitudes"])
+    xd = np.linspace(xmin, xmax, segments + 1)
     yinterp = interp1d(data["longitudes"], data["latitudes"])
     geoLines = []
     for x1 in xd:
         if x1 != xd[-1]:
             x2 = xd[np.where(xd==x1)[0][0] + 1]
             xs = np.linspace(x1, x2, sections)
-            line = analysis.Line(x1, yinterp(x1).tolist(), x2, yinterp(x2).tolist())
+            y1 = yinterp(x1).tolist()
+            y2 = yinterp(x2).tolist()
+            line = analysis.Line(x1, y1, x2, y2)
             for xSection1 in xs:
                 if xSection1 != xs[-1]:
                     xSection2 = xs[np.where(xs==xSection1)[0][0] + 1]
