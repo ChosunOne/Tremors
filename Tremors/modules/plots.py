@@ -3,7 +3,7 @@ import matplotlib.dates as mdates
 import matplotlib.cm as cm
 import numpy as np
 
-def plotZones(latitudes, longitudes, xd, yinterp):
+def plotZones(latitudes, longitudes, geoLines, perpGeoLines):
     zones = len(latitudes)
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -11,12 +11,18 @@ def plotZones(latitudes, longitudes, xd, yinterp):
 
     ax.set_xlabel('Longitude')
     ax.set_ylabel('Latitude')
+    ax.set_aspect('equal')
 
     colors = cm.rainbow(np.linspace(0, 1, zones))
     for z in range(0, zones):
         ax.scatter(longitudes[z], latitudes[z], color=colors[z])
+        xd = [geoLines[z].x1, geoLines[z].x2]
+        yd = [geoLines[z].y1, geoLines[z].y2]
+        ax.plot(xd, yd, color='k', linestyle='-', linewidth=3)
 
-    ax.plot(xd, yinterp(xd), color='k', linestyle='-', linewidth=3)
+        xpd = [perpGeoLines[z].x1, perpGeoLines[z].x2]
+        ypd = [perpGeoLines[z].y1, perpGeoLines[z].y2]
+        ax.plot(xpd, ypd, color='k', linestyle='-', linewidth=3)
 
     fig.savefig("../images/zone map.png")
     plt.close(fig)

@@ -4,16 +4,19 @@ import modules.processing as processing
 import datetime as dt
 
 pattern = "%Y/%m/%d %H:%M:%S"
+segments = 3
+sections = 3
 
 startTime = dt.datetime.strptime("2012/01/01 00:00:00", pattern)
 endTime = dt.datetime.strptime("2012/3/29 00:00:00", pattern)
 
 #data = processing.readTremorData(startTime, endTime, "JMA_2001_2013_Japan.txt", "%Y/%m/%d %H:%M:%S")
 data = processing.readTremorData(startTime, endTime, "trm_Nankai.20120101.0090.154912263.csv", "%Y-%m-%d %H:%M")
-geoLines, xd, yinterp = processing.createGeoLines(6, 5, data)
-procData = processing.processTremorData(data, geoLines)
+geoLines = processing.createGeoLines(segments, sections, data)
+perpGeoLines = processing.createPerpGeoLines(geoLines)
+procData = processing.processTremorData(data, geoLines, perpGeoLines)
 
-plots.plotZones(procData["perpendicular"]["latitudes"], procData["perpendicular"]["longitudes"], xd, yinterp)
+plots.plotZones(procData["perpendicular"]["latitudes"], procData["perpendicular"]["longitudes"], geoLines, perpGeoLines)
 zones = len(procData["perpendicular"]["dates"])
 for i in range(0, zones):
     plots.plotZone(procData["perpendicular"]["dates"][i], procData["perpendicular"]["distances"][i], procData["perpendicular"]["magnitudes"][i], zones, i, "Tremor Distances " + str(i) + " Perp")

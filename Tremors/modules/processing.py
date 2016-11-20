@@ -113,9 +113,28 @@ def createGeoLines(segments, sections, data):
                     geoLine = analysis.Line(xSection1, line.y(xSection1), xSection2, line.y(xSection2))
                     geoLines += [geoLine]
 
-    return geoLines, xd, yinterp
+    return geoLines
 
-def processTremorData(data, geoLines):
+def createPerpGeoLines(geoLines):
+    perpGeoLines = []
+    for line in geoLines:
+        length = ((line.x2 - line.x1)**2 + (line.y2 - line.y1)**2)**.5
+
+        lineUnitVector = ((line.x2 - line.x1) / length, (line.y2 - line.y1) / length)
+        perpLineUnitVector = (lineUnitVector[1] * -1, lineUnitVector[0])
+
+        midpoint = ((line.x2 + line.x1) / 2, (line.y2 + line.y1) / 2)
+        dist = length / 2.
+
+        perpLineX = (midpoint[0] + -dist * perpLineUnitVector[0], midpoint[0] + dist * perpLineUnitVector[0]) 
+        perpLineY = (midpoint[1] + -dist * perpLineUnitVector[1], midpoint[1] + dist * perpLineUnitVector[1])
+
+        perpLine = analysis.Line(perpLineX[0], perpLineY[0], perpLineX[1], perpLineY[1])
+        perpGeoLines += [perpLine]
+
+    return perpGeoLines
+
+def processTremorData(data, geoLines, perpGeoLines):
     length = len(geoLines)
     eventParaDist = [[] for x in range(0, length)]
     eventPerpDist = [[] for x in range(0, length)]
@@ -138,17 +157,6 @@ def processTremorData(data, geoLines):
     eventParaTypes = [[] for x in range(0, length)]
     eventPerpTypes = [[] for x in range(0, length)]
     inf = np.inf
-
-    perpGeoLines = []
-    for line in geoLines:
-        length = ((line.x2 - line.x1)**2 + (line.y2 - line.y1)**2)**.5
-        lineUnitVector = ((line.x2 - line.x1) / length, (line.y2 - line.y1) / length)
-        perpLineUnitVector = (lineUnitVector[1] * -1, lineUnitVector[0])
-        midpoint = ((line.x2 + line.x1) / 2, (line.y2 + line.y1) / 2)
-        perpLineX = (midpoint[0] + -1. * length / 2. * perpLineUnitVector[0], midpoint[0] + length / 2. * perpLineUnitVector[0]) 
-        perpLineY = (midpoint[1] + -1. * length / 2. * perpLineUnitVector[1], midpoint[1] + length / 2. * perpLineUnitVector[1])
-        perpLine = analysis.Line(perpLineX[0], perpLineY[0], perpLineX[1], perpLineY[1])
-        perpGeoLines += [perpLine]
 
     for i in range(0, len(data["latitudes"])):
         shortestParaDist = inf
