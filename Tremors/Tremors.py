@@ -7,11 +7,12 @@ pattern = "%Y/%m/%d %H:%M:%S"
 segments = 3
 sections = 3
 
-startTime = dt.datetime.strptime("2012/01/01 00:00:00", pattern)
-endTime = dt.datetime.strptime("2012/3/29 00:00:00", pattern)
+startTime = dt.datetime.strptime("2008/01/01 00:00:00", pattern)
+endTime = dt.datetime.strptime("2008/12/31 00:00:00", pattern)
 
 #data = processing.readTremorData(startTime, endTime, "JMA_2001_2013_Japan.txt", "%Y/%m/%d %H:%M:%S")
-data = processing.readTremorData(startTime, endTime, "trm_Nankai.20120101.0090.154912263.csv", "%Y-%m-%d %H:%M")
+#data = processing.readTremorData(startTime, endTime, "trm_Nankai.20120101.0090.154912263.csv", "%Y-%m-%d %H:%M")
+data = processing.readTremorData(startTime, endTime, "2008_Nankai.csv", "%Y-%m-%d %H:%M")
 geoLines = processing.createGeoLines(segments, sections, data)
 perpGeoLines = processing.createPerpGeoLines(geoLines)
 procData = processing.processTremorData(data, geoLines, perpGeoLines)
