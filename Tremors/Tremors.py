@@ -6,6 +6,7 @@ import datetime as dt
 pattern = "%Y/%m/%d %H:%M:%S"
 segments = 3
 sections = 3
+windowSize = 5
 
 startTime = dt.datetime.strptime("2008/01/01 00:00:00", pattern)
 endTime = dt.datetime.strptime("2008/12/31 00:00:00", pattern)
@@ -17,9 +18,14 @@ geoLines = processing.createGeoLines(segments, sections, data)
 perpGeoLines = processing.createPerpGeoLines(geoLines)
 procData = processing.processTremorData(data, geoLines, perpGeoLines)
 
+
+
 plots.plotZones(procData["perpendicular"]["latitudes"], procData["perpendicular"]["longitudes"], geoLines, perpGeoLines)
 zones = len(procData["perpendicular"]["dates"])
 for i in range(0, zones):
+    print("Finding migrations in zone " + str(i))
+    migrateDates, migrateDistances = processing.findTremors(procData, "perpendicular", windowSize, i)
+    plots.plotZone(migrateDates, migrateDistances, procData["perpendicular"]["magnitudes"][i], zones, i, "Migrating tremors " + str(i))
     plots.plotZone(procData["perpendicular"]["dates"][i], procData["perpendicular"]["distances"][i], procData["perpendicular"]["magnitudes"][i], zones, i, "Tremor Distances " + str(i) + " Perp")
     plots.plotZone(procData["parallel"]["dates"][i], procData["parallel"]["distances"][i], procData["parallel"]["magnitudes"][i], zones, i, "Tremor Distances " + str(i) + " Para")
 

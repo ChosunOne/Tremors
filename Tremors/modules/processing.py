@@ -3,6 +3,7 @@ import datetime as dt
 import random
 import numpy as np
 from scipy.interpolate import interp1d
+from numpy import poly1d
 import modules.analysis as analysis
 
 def readTremorData(startTime, endTime, file, pattern):
@@ -206,4 +207,38 @@ def processTremorData(data, geoLines, perpGeoLines):
 
     return procData
     
+def findTremors(procData, dataset, windowSize, zone):
+    migrationDistances = []
+    migrationDates = []
+
+    dates = procData[dataset]["dates"][zone]
+    distances = procData[dataset]["distances"][zone]
+
+    for date in dates:
+    
+        if date == dates[-1]:
+            break
+
+        window = {"dates":[], "distances":[]}
+        currentDate = date
+        index = dates.index(currentDate)
+
+        while abs(date - currentDate) < dt.timedelta(windowSize):
+
+            window["dates"] += [currentDate]
+            window["distances"] += [distances[index]]
+
+            if dates[index + 1] == dates[-1]:
+                break
+            else:
+                index += 1
+                currentDate = dates[index]
+            
+        fit = np.polyfit([x.timestamp() for x in window["dates"]], window["distances"], 1, full=True)
+        residual = fit[1]
+        if residual < 1:
+            migrationDistances += [distances[dates.index(date)]]
+            migrationDates += [date]
+        
+    return migrationDates, migrationDistances
         
