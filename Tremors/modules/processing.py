@@ -83,8 +83,6 @@ def readTremorData(startTime, endTime, file, pattern):
                 types += [float(line[6])]
             else:
                 types += [0]
-
-
     
     dates = np.array(dates)
     latitudes = np.array(latitudes)
@@ -207,7 +205,7 @@ def processTremorData(data, geoLines, perpGeoLines):
 
     return procData
     
-def findTremors(procData, dataset, windowSize, zone):
+def findMigrations(procData, dataset, windowSize, zone):
     migrationDistances = []
     migrationDates = []
 
