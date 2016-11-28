@@ -5,6 +5,7 @@ import numpy as np
 from scipy.interpolate import interp1d
 from numpy import poly1d
 import modules.analysis as analysis
+from modules.migration import Migration
 
 def readTremorData(startTime, endTime, file, pattern):
     os.environ['TZ'] = 'UTC'
@@ -206,11 +207,21 @@ def processTremorData(data, geoLines, perpGeoLines):
     return procData
     
 def findMigrations(procData, dataset, windowSize, zone):
+    residualThreshold = .1
+    eventThreshold = 3
+
     migrationDistances = []
     migrationDates = []
+    migrationLongitudes = []
+    migrationLatitudes = []
+    migrationMagnitudes = []
+    migrations = []
 
     dates = procData[dataset]["dates"][zone]
     distances = procData[dataset]["distances"][zone]
+    longitudes = procData[dataset]["longitudes"][zone]
+    latitudes = procData[dataset]["latitudes"][zone]
+    magnitudes = procData[dataset]["magnitudes"][zone]
 
     for date in dates:
     
@@ -218,25 +229,48 @@ def findMigrations(procData, dataset, windowSize, zone):
             break
 
         window = {"dates":[], "distances":[]}
-        currentDate = date
-        index = dates.index(currentDate)
+        index = dates.index(date)
 
-        while abs(date - currentDate) < dt.timedelta(windowSize):
-
-            window["dates"] += [currentDate]
+        for x in range(0, windowSize):
+            window["dates"] += [dates[index]]
             window["distances"] += [distances[index]]
 
             if dates[index + 1] == dates[-1]:
                 break
-            else:
+            else:  
                 index += 1
-                currentDate = dates[index]
+
+
+        #while abs(date - currentDate) < dt.timedelta(windowSize):
+
+        #    window["dates"] += [currentDate]
+        #    window["distances"] += [distances[index]]
+
+        #    if dates[index + 1] == dates[-1]:
+        #        break
+        #    else:
+        #        index += 1
+        #        currentDate = dates[index]
             
         fit = np.polyfit([x.timestamp() for x in window["dates"]], window["distances"], 1, full=True)
         residual = fit[1]
-        if residual < 1:
-            migrationDistances += [distances[dates.index(date)]]
+
+        if residual < residualThreshold:
+            i = dates.index(date)
+
+            migrationDistances += [distances[i]]
             migrationDates += [date]
+            migrationLatitudes += [latitudes[i]]
+            migrationLongitudes += [longitudes[i]]
+            migrationMagnitudes += [magnitudes[i]]
+        elif residual >= residualThreshold and len(migrationDistances) > eventThreshold:
+            migrations += [Migration(migrationDates, migrationDistances, migrationLatitudes, migrationLongitudes, migrationMagnitudes)]
+            
+            migrationDistances = []
+            migrationDates = []
+            migrationLatitudes = []
+            migrationLongitudes = []
+            migrationMagnitudes = []
         
-    return migrationDates, migrationDistances
+    return migrations
         

@@ -6,7 +6,7 @@ import datetime as dt
 pattern = "%Y/%m/%d %H:%M:%S"
 segments = 3
 sections = 3
-windowSize = 5
+windowSize = 10
 
 startTime = dt.datetime.strptime("2008/01/01 00:00:00", pattern)
 endTime = dt.datetime.strptime("2008/12/31 00:00:00", pattern)
@@ -22,9 +22,9 @@ plots.plotZones(procData["perpendicular"]["latitudes"], procData["perpendicular"
 zones = len(procData["perpendicular"]["dates"])
 for i in range(0, zones):
     print("Finding migrations in zone " + str(i))
-    migrateDates, migrateDistances = processing.findMigrations(procData, "perpendicular", windowSize, i)
+    migrations = processing.findMigrations(procData, "perpendicular", windowSize, i)
 
-    plots.plotZone(migrateDates, migrateDistances, procData["perpendicular"]["magnitudes"][i], zones, i, "Migrating tremors " + str(i))
+    plots.plotMigrations(migrations, "Tremor Migrations " + str(i))
 
     plots.plotZone(procData["perpendicular"]["dates"][i], procData["perpendicular"]["distances"][i], 
         procData["perpendicular"]["magnitudes"][i], zones, i, "Tremor Distances " + str(i) + " Perp")

@@ -43,3 +43,21 @@ def plotZone(dates, distances, magnitudes, zones, zone, title):
 
     fig.savefig("../images/" + title + ".png")
     plt.close(fig)
+
+def plotMigrations(migrations, title):
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
+    ax.set_title(title)
+    ax.set_xlabel('Date')
+    ax.set_ylabel('Distance')
+
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y/%m/%d %H:%M:%S'))
+    plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=7))
+    colors = cm.rainbow(np.linspace(0, 1, len(migrations)))
+
+    for migration in migrations:
+        ax.scatter(migration.eventDates, migration.eventDistances, color = colors[migrations.index(migration)])
+
+    fig.savefig("../images/migrations/" + title +".png")
+    plt.close(fig)
