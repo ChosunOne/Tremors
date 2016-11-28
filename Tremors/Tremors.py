@@ -4,7 +4,7 @@ import modules.processing as processing
 import datetime as dt
 
 pattern = "%Y/%m/%d %H:%M:%S"
-segments = 3
+segments = 7
 sections = 3
 windowSize = 10
 
@@ -24,7 +24,9 @@ for i in range(0, zones):
     print("Finding migrations in zone " + str(i))
     migrations = processing.findMigrations(procData, "perpendicular", windowSize, i)
 
-    plots.plotMigrations(migrations, "Tremor Migrations " + str(i))
+    plots.plotMigrations(migrations, "Tremor Migrations Zone " + str(i))
+    for migration in migrations:
+        plots.plotMigrations([migration], "Zone " + str(i) + " Migration " + str(migrations.index(migration)))
 
     plots.plotZone(procData["perpendicular"]["dates"][i], procData["perpendicular"]["distances"][i], 
         procData["perpendicular"]["magnitudes"][i], zones, i, "Tremor Distances " + str(i) + " Perp")

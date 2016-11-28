@@ -98,14 +98,14 @@ def createGeoLines(segments, sections, data):
     xmin = min(data["longitudes"])
     xmax = max(data["longitudes"])
     xd = np.linspace(xmin, xmax, segments + 1)
-    yinterp = interp1d(data["longitudes"], data["latitudes"])
+    yfit = poly1d(np.polyfit(data["longitudes"], data["latitudes"], 6))
     geoLines = []
     for x1 in xd:
         if x1 != xd[-1]:
             x2 = xd[np.where(xd==x1)[0][0] + 1]
             xs = np.linspace(x1, x2, sections)
-            y1 = yinterp(x1).tolist()
-            y2 = yinterp(x2).tolist()
+            y1 = yfit(x1).tolist()
+            y2 = yfit(x2).tolist()
             line = analysis.Line(x1, y1, x2, y2)
             for xSection1 in xs:
                 if xSection1 != xs[-1]:
@@ -207,8 +207,9 @@ def processTremorData(data, geoLines, perpGeoLines):
     return procData
     
 def findMigrations(procData, dataset, windowSize, zone):
-    residualThreshold = .1
-    eventThreshold = 3
+    residualThreshold = .05
+    eventThreshold = 5
+    fixedWindowSize = 10
 
     migrationDistances = []
     migrationDates = []
@@ -231,31 +232,22 @@ def findMigrations(procData, dataset, windowSize, zone):
         window = {"dates":[], "distances":[]}
         index = dates.index(date)
 
-        for x in range(0, windowSize):
-            window["dates"] += [dates[index]]
-            window["distances"] += [distances[index]]
+        for x in range(0, fixedWindowSize):
+            if dates[index] - date < dt.timedelta(days = windowSize):
+                window["dates"] += [dates[index]]
+                window["distances"] += [distances[index]]
+            else:
+                continue
 
             if dates[index + 1] == dates[-1]:
                 break
             else:  
                 index += 1
-
-
-        #while abs(date - currentDate) < dt.timedelta(windowSize):
-
-        #    window["dates"] += [currentDate]
-        #    window["distances"] += [distances[index]]
-
-        #    if dates[index + 1] == dates[-1]:
-        #        break
-        #    else:
-        #        index += 1
-        #        currentDate = dates[index]
             
         fit = np.polyfit([x.timestamp() for x in window["dates"]], window["distances"], 1, full=True)
         residual = fit[1]
 
-        if residual < residualThreshold:
+        if residual < residualThreshold and len(window["dates"]) == fixedWindowSize:
             i = dates.index(date)
 
             migrationDistances += [distances[i]]
@@ -263,9 +255,20 @@ def findMigrations(procData, dataset, windowSize, zone):
             migrationLatitudes += [latitudes[i]]
             migrationLongitudes += [longitudes[i]]
             migrationMagnitudes += [magnitudes[i]]
-        elif residual >= residualThreshold and len(migrationDistances) > eventThreshold:
+
+        elif (residual >= residualThreshold and len(migrationDistances) > eventThreshold):
             migrations += [Migration(migrationDates, migrationDistances, migrationLatitudes, migrationLongitudes, migrationMagnitudes)]
             
+            migrationDistances = []
+            migrationDates = []
+            migrationLatitudes = []
+            migrationLongitudes = []
+            migrationMagnitudes = []
+
+        else:
+            if len(migrationDistances) > eventThreshold:
+                migrations += [Migration(migrationDates, migrationDistances, migrationLatitudes, migrationLongitudes, migrationMagnitudes)]
+
             migrationDistances = []
             migrationDates = []
             migrationLatitudes = []
