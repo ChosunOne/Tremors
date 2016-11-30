@@ -267,7 +267,9 @@ def findMigrations(procData, dataset, windowSize, zone):
 
         else:
             if len(migrationDistances) > eventThreshold:
-                migrations += [Migration(migrationDates, migrationDistances, migrationLatitudes, migrationLongitudes, migrationMagnitudes)]
+                migration = Migration(migrationDates, migrationDistances, migrationLatitudes, migrationLongitudes, migrationMagnitudes)
+                if migration.duration > dt.timedelta(days=1):
+                    migrations += [migration]
 
             migrationDistances = []
             migrationDates = []

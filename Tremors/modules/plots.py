@@ -61,3 +61,17 @@ def plotMigrations(migrations, title):
 
     fig.savefig("../images/migrations/" + title +".png")
     plt.close(fig)
+
+def plotMigration(migration, title):
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
+    ax.set_title(title)
+    ax.set_xlabel('Longitude')
+    ax.set_ylabel('Latitude')
+    ax.set_aspect('equal')
+
+    #ax.plot((migration.origin[1], migration.terminus[1]), (migration.origin[0], migration.terminus[0]))
+    ax.scatter(migration.eventLongitudes, migration.eventLatitudes)
+    fig.savefig("../images/migrations/" + title + ".png")
+    plt.close(fig)

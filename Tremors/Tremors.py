@@ -34,6 +34,18 @@ for i in range(0, zones):
     plots.plotZone(procData["parallel"]["dates"][i], procData["parallel"]["distances"][i], 
         procData["parallel"]["magnitudes"][i], zones, i, "Tremor Distances " + str(i) + " Para")
 
+zones = len(procData["parallel"]["dates"])
+for i in range(0, zones):
+    print("Finding migrations in zone " + str(i))
+    migrations = processing.findMigrations(procData, "parallel", windowSize, i)
+
+    plots.plotMigrations(migrations, "Parallel Tremor Migrations Zone " + str(i))
+    for migration in migrations:
+        plots.plotMigrations([migration], "Parallel Zone " + str(i) + " Migration " + str(migrations.index(migration)))
+        plots.plotMigration(migration, "Geographic Parallel Zone " + str(i) + " Migration " + str(migrations.index(migration)))
+
+
+
 
 
 
