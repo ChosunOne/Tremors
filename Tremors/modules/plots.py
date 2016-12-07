@@ -72,6 +72,8 @@ def plotMigration(migration, title):
     ax.set_aspect('equal')
 
     #ax.plot((migration.origin[1], migration.terminus[1]), (migration.origin[0], migration.terminus[0]))
-    ax.scatter(migration.eventLongitudes, migration.eventLatitudes)
+    colors = cm.rainbow(np.linspace(0, 1, len(migration.eventLongitudes)))
+    for x in range(0, len(migration.eventLongitudes)):
+        ax.scatter(migration.eventLongitudes[x], migration.eventLatitudes[x], color = colors[x])
     fig.savefig("../images/migrations/" + title + ".png")
     plt.close(fig)

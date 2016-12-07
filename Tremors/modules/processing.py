@@ -206,10 +206,7 @@ def processTremorData(data, geoLines, perpGeoLines):
 
     return procData
     
-def findMigrations(procData, dataset, windowSize, zone):
-    residualThreshold = .05
-    eventThreshold = 5
-    fixedWindowSize = 10
+def findMigrations(procData, dataset, windowSize, zone, residualThreshold = .05, eventThreshold = 20, fixedWindowSize = 10):
 
     migrationDistances = []
     migrationDates = []
