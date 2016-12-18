@@ -25,6 +25,7 @@ zones = len(procData["perpendicular"]["dates"])
 for i in range(0, zones):
     print("Finding migrations in zone " + str(i))
     migrations = processing.findMigrations(procData, "perpendicular", windowSize, i)
+    locations = processing.locateMigrations(migrations, .01)
 
     plots.plotMigrations(migrations, "Tremor Migrations Zone " + str(i))
     for migration in migrations:

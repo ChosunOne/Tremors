@@ -282,4 +282,21 @@ def findMigrations(procData, dataset, windowSize, zone, residualThreshold = .05,
             migrationMagnitudes = []
         
     return migrations
+
+def locateMigrations(migrations, distanceThreshold):
+    locations = []
+    for migration in migrations:
+        if len(locations) == 0:
+            locations += [[migration]]
+
+        else:   
+            for location in locations:
+                center = sum([x.center[0] for x in location]) / len(location), sum([x.center[1] for x in location]) / len(location)
+                if ((center[0] - migration.center[0])**2 + (center[1] - migration.center[1])**2)**.5 < distanceThreshold:
+                    location += [migration]  
+                    break
+                else:
+                    locations += [[migration]]
+    return locations
+                
         
