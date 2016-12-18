@@ -8,13 +8,13 @@ segments = 7
 sections = 3
 windowSize = 10
 
-year = "2008"
+years = ["2004", "2007"]
 
-startTime = dt.datetime.strptime(year + "/01/02 00:00:00", pattern)
-endTime = dt.datetime.strptime(year + "/12/31 00:00:00", pattern)
+startTime = dt.datetime.strptime(years[0] + "/05/02 00:00:00", pattern)
+endTime = dt.datetime.strptime(years[1] + "/12/31 00:00:00", pattern)
 
 print("Reading raw tremor data")
-data = processing.readTremorData(startTime, endTime, year + "_Nankai.csv", "%Y-%m-%d %H:%M")
+data = processing.readTremorData(startTime, endTime, years[0] + "_Nankai.csv", "%Y-%m-%d %H:%M")
 
 geoLines = processing.createGeoLines(segments, sections, data)
 perpGeoLines = processing.createPerpGeoLines(geoLines)
@@ -25,7 +25,7 @@ zones = len(procData["perpendicular"]["dates"])
 for i in range(0, zones):
     print("Finding migrations in zone " + str(i))
     migrations = processing.findMigrations(procData, "perpendicular", windowSize, i)
-    locations = processing.locateMigrations(migrations, .01)
+    #locations = processing.locateMigrations(migrations, .01)
 
     plots.plotMigrations(migrations, "Tremor Migrations Zone " + str(i))
     plots.plotMigrationsGeo(migrations, "Geographic Tremor Migrations Zone " + str(i))
