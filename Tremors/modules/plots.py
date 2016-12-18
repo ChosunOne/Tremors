@@ -77,3 +77,19 @@ def plotMigration(migration, title):
         ax.scatter(migration.eventLongitudes[x], migration.eventLatitudes[x], color = colors[x])
     fig.savefig("../images/migrations/" + title + ".png")
     plt.close(fig)
+
+def plotMigrationsGeo(migrations, title):
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
+    ax.set_title(title)
+    ax.set_xlabel('Longitude')
+    ax.set_ylabel('Latitude')
+
+    colors = cm.rainbow(np.linspace(0, 1, len(migrations)))
+
+    for migration in migrations:
+        ax.scatter(migration.eventLongitudes, migration.eventLatitudes, color = colors[migrations.index(migration)])
+
+    fig.savefig("../images/migrations/" + title + ".png")
+    plt.close(fig)

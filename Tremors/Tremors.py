@@ -28,6 +28,7 @@ for i in range(0, zones):
     locations = processing.locateMigrations(migrations, .01)
 
     plots.plotMigrations(migrations, "Tremor Migrations Zone " + str(i))
+    plots.plotMigrationsGeo(migrations, "Geographic Tremor Migrations Zone " + str(i))
     for migration in migrations:
         plots.plotMigrations([migration], "Zone " + str(i) + " Migration " + str(migrations.index(migration)))
 
