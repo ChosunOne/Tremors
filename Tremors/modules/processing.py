@@ -2,7 +2,6 @@ import os
 import datetime as dt
 import random
 import numpy as np
-from scipy.interpolate import interp1d
 from numpy import poly1d
 import modules.analysis as analysis
 from modules.migration import Migration
@@ -98,12 +97,20 @@ def createGeoLines(segments, sections, data):
     xmin = min(data["longitudes"])
     xmax = max(data["longitudes"])
     xd = np.linspace(xmin, xmax, segments + 1)
-    yfit = poly1d(np.polyfit(data["longitudes"], data["latitudes"], 6))
+    #yfit = poly1d(np.polyfit(data["longitudes"], data["latitudes"], 6))
     geoLines = []
     for x1 in xd:
         if x1 != xd[-1]:
             x2 = xd[np.where(xd==x1)[0][0] + 1]
             xs = np.linspace(x1, x2, sections)
+            sectionX = []
+            sectionY = []
+            for x in range(0, len(data["longitudes"])):
+                if data["longitudes"][x] >= x1 and data["longitudes"][x] <= x2:
+                    sectionX += [data["longitudes"][x]]
+                    sectionY += [data["latitudes"][x]]
+            yfit = poly1d(np.polyfit(sectionX, sectionY, 1))
+
             y1 = yfit(x1).tolist()
             y2 = yfit(x2).tolist()
             line = analysis.Line(x1, y1, x2, y2)

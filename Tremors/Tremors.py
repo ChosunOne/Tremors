@@ -12,7 +12,9 @@ year = "2008"
 
 startTime = dt.datetime.strptime(year + "/01/02 00:00:00", pattern)
 endTime = dt.datetime.strptime(year + "/12/31 00:00:00", pattern)
-data = processing.readTremorData(startTime, endTime, year + "_Nankai_clustered.csv", "%Y-%m-%d %H:%M")
+
+print("Reading raw tremor data")
+data = processing.readTremorData(startTime, endTime, year + "_Nankai.csv", "%Y-%m-%d %H:%M")
 
 geoLines = processing.createGeoLines(segments, sections, data)
 perpGeoLines = processing.createPerpGeoLines(geoLines)
