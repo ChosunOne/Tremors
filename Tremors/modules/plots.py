@@ -125,3 +125,25 @@ def plotMigrationsGeo(migrations, title, savePath = ""):
     fig.savefig(savePath)
     plt.close(fig)
     return (minLongitude, minLatitude, maxLongitude, maxLatitude)
+
+def plotLocations(locations, title, minLongitude, minLatitude, maxLongitude, maxLatitude, savePath = ""):
+    if savePath == "":
+        savePath = "../Tremors/images/migrations/"+ title + ".png"
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
+    ax.set_title(title)
+    ax.set_xlabel('Longitude')
+    ax.set_ylabel('Latitude')
+    ax.set_aspect('equal')
+
+    colors = cm.rainbow(np.linspace(0, 1, len(locations)))
+
+    for location in locations:
+        for migration in location:
+            ax.scatter(migration.eventLongitudes, migration.eventLatitudes, color = colors[locations.index(location)])
+    
+    plt.ylim(minLatitude, maxLatitude)
+    plt.xlim(minLongitude, maxLongitude)
+    fig.savefig(savePath)
+    plt.close(fig)

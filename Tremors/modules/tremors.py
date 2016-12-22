@@ -34,6 +34,9 @@ def detectMigrations(pattern = "%Y/%m/%d %H:%M:%S", segments = 7, sections = 3, 
         if not os.path.exists("../Tremors/images/perpendicular/migrations/zone " + str(i) + "/geographic"):
             os.makedirs("../Tremors/images/perpendicular/migrations/zone " + str(i) + "/geographic")
 
+        if not os.path.exists("../Tremors/images/perpendicular/migrations/zone " + str(i) + "/geographic/locations"):
+            os.makedirs("../Tremors/images/perpendicular/migrations/zone " + str(i) + "/geographic/locations")
+
         if not os.path.exists("../Tremors/images/perpendicular/migrations/zone " + str(i) + "/linear"):
             os.makedirs("../Tremors/images/perpendicular/migrations/zone " + str(i) + "/linear")
 
@@ -52,6 +55,9 @@ def detectMigrations(pattern = "%Y/%m/%d %H:%M:%S", segments = 7, sections = 3, 
                 frame[0], frame[1], frame[2], frame[3], 
                 savePath = "../Tremors/images/perpendicular/migrations/zone " + str(i) + "/geographic/Migration " + str(migrations.index(migration)) + ".png")
 
+        plots.plotLocations(locations, "Perpendicular Migration Locations Zone " + str(i), frame[0], frame[1], frame[2], frame[3], 
+            savePath = "../Tremors/images/perpendicular/migrations/zone " + str(i) + "/geographic/locations/Zone " + str(i) + " Migration Locations.png")
+
         plots.plotZone(procData["perpendicular"]["dates"][i], procData["perpendicular"]["distances"][i], 
             procData["perpendicular"]["magnitudes"][i], zones, i, "Perpendicular Tremor Distances Zone " + str(i),
             savePath = "../Tremors/images/perpendicular/distances/Perpendicular Tremor Distances Zone " + str(i) + ".png")
@@ -61,6 +67,7 @@ def detectMigrations(pattern = "%Y/%m/%d %H:%M:%S", segments = 7, sections = 3, 
         os.system('cls')
         print("Finding parallel migrations in zone " + str(i))
         migrations = processing.findMigrations(procData, "parallel", windowSize, i)
+        locations = processing.locateMigrations(migrations, distanceThreshold)
 
         if not os.path.exists("../Tremors/images/parallel/migrations/zone " + str(i)):
             os.makedirs("../Tremors/images/parallel/migrations/zone " + str(i))
@@ -70,6 +77,9 @@ def detectMigrations(pattern = "%Y/%m/%d %H:%M:%S", segments = 7, sections = 3, 
 
         if not os.path.exists("../Tremors/images/parallel/migrations/zone " + str(i) + "/linear"):
             os.makedirs("../Tremors/images/parallel/migrations/zone " + str(i) + "/linear")
+
+        if not os.path.exists("../Tremors/images/parallel/migrations/zone " + str(i) + "/geographic/locations"):
+            os.makedirs("../Tremors/images/parallel/migrations/zone " + str(i) + "/geographic/locations")
 
         if not os.path.exists("../Tremors/images/parallel/distances"):
             os.makedirs("../Tremors/images/parallel/distances")
@@ -85,6 +95,9 @@ def detectMigrations(pattern = "%Y/%m/%d %H:%M:%S", segments = 7, sections = 3, 
             plots.plotMigration(migration, "Geographic Parallel Zone " + str(i) + " Migration " + str(migrations.index(migration)), 
                 frame[0], frame[1], frame[2], frame[3], 
                 savePath = "../Tremors/images/parallel/migrations/zone " + str(i) + "/geographic/Migration " + str(migrations.index(migration)) + ".png")
+
+        plots.plotLocations(locations, "Parallel Migration Locations Zone " + str(i), frame[0], frame[1], frame[2], frame[3], 
+            savePath = "../Tremors/images/parallel/migrations/zone " + str(i) + "/geographic/locations/Zone " + str(i) + " Migration Locations.png")
 
         plots.plotZone(procData["parallel"]["dates"][i], procData["parallel"]["distances"][i], 
             procData["parallel"]["magnitudes"][i], zones, i, "Parallel Tremor Distances Zone " + str(i), 
