@@ -39,12 +39,13 @@ def plotZone(dates, distances, magnitudes, zones, zone, title, savePath = ""):
     ax.set_xlabel('Date')
     ax.set_ylabel('Distance ')
 
-    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y/%m/%d %H:%M:%S'))
-    plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=7))
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y/%m/%d'))
+    plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=14))
 
     colors = cm.rainbow(np.linspace(0, 1, zones))
     ax.scatter(dates, distances, color = colors[zone])
-
+    
+    plt.gcf().autofmt_xdate()
     fig.savefig(savePath)
     plt.close(fig)
 
@@ -60,11 +61,13 @@ def plotMigrations(migrations, title, savePath = ""):
 
     plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y/%m/%d %H:%M:%S'))
     plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=7))
+
     colors = cm.rainbow(np.linspace(0, 1, len(migrations)))
 
     for migration in migrations:
         ax.scatter(migration.eventDates, migration.eventDistances, color = colors[migrations.index(migration)])
 
+    plt.gcf().autofmt_xdate()
     fig.savefig(savePath)
     plt.close(fig)
 
