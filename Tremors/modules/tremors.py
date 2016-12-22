@@ -5,7 +5,7 @@ import datetime as dt
 import os
 
 def detectMigrations(pattern = "%Y/%m/%d %H:%M:%S", segments = 7, sections = 3, windowSize = 10, startyear = "2004", startdate = "/01/01", 
-    endyear = "2004", enddate = "/12/31", datafile = ""):
+    endyear = "2004", enddate = "/12/31", datafile = "", residualThreshold = .05, eventThreshold = 20, fixedWindowSize = 10, distanceThreshold = .05):
 
     startTime = dt.datetime.strptime(startyear + startdate + " 00:00:00", pattern)
     endTime = dt.datetime.strptime(endyear + enddate + " 00:00:00", pattern)
@@ -25,8 +25,8 @@ def detectMigrations(pattern = "%Y/%m/%d %H:%M:%S", segments = 7, sections = 3, 
     for i in range(0, zones):
         os.system('cls')
         print("Finding perpendicular migrations in zone " + str(i))
-        migrations = processing.findMigrations(procData, "perpendicular", windowSize, i)
-        #locations = processing.locateMigrations(migrations, .01)
+        migrations = processing.findMigrations(procData, "perpendicular", windowSize, i, residualThreshold, eventThreshold, fixedWindowSize)
+        locations = processing.locateMigrations(migrations, distanceThreshold)
 
         if not os.path.exists("../Tremors/images/perpendicular/migrations/zone " + str(i)):
             os.makedirs("../Tremors/images/perpendicular/migrations/zone " + str(i))
@@ -42,18 +42,19 @@ def detectMigrations(pattern = "%Y/%m/%d %H:%M:%S", segments = 7, sections = 3, 
 
         plots.plotMigrations(migrations, "Perpendicular Tremor Migrations Zone " + str(i), 
             savePath = "../Tremors/images/perpendicular/migrations/zone " + str(i) + "/Perpendicular Tremor Migrations Zone " + str(i) + ".png")
-        plots.plotMigrationsGeo(migrations, "Geographic Perpendicular Tremor Migrations Zone " + str(i),
+        frame = plots.plotMigrationsGeo(migrations, "Geographic Perpendicular Tremor Migrations Zone " + str(i),
             savePath = "../Tremors/images/perpendicular/migrations/zone " + str(i) + "/geographic/Geographic Perpendicular Tremor Migrations Zone " + str(i) + ".png")
 
         for migration in migrations:
             plots.plotMigrations([migration], "Perpendicular Zone " + str(i) + " Migration " + str(migrations.index(migration)), 
                 savePath = "../Tremors/images/perpendicular/migrations/zone " + str(i) + "/linear/Migration " + str(migrations.index(migration)) + ".png")
             plots.plotMigration(migration, "Geographic Perpendicular Zone " + str(i) + " Migration " + str(migrations.index(migration)), 
+                frame[0], frame[1], frame[2], frame[3], 
                 savePath = "../Tremors/images/perpendicular/migrations/zone " + str(i) + "/geographic/Migration " + str(migrations.index(migration)) + ".png")
 
         plots.plotZone(procData["perpendicular"]["dates"][i], procData["perpendicular"]["distances"][i], 
             procData["perpendicular"]["magnitudes"][i], zones, i, "Perpendicular Tremor Distances Zone " + str(i),
-            "../Tremors/images/perpendicular/distances/Perpendicular Tremor Distances Zone " + str(i) + ".png")
+            savePath = "../Tremors/images/perpendicular/distances/Perpendicular Tremor Distances Zone " + str(i) + ".png")
 
     zones = len(procData["parallel"]["dates"])
     for i in range(0, zones):
@@ -75,13 +76,14 @@ def detectMigrations(pattern = "%Y/%m/%d %H:%M:%S", segments = 7, sections = 3, 
 
         plots.plotMigrations(migrations, "Parallel Tremor Migrations Zone " + str(i),
             savePath = "../Tremors/images/parallel/migrations/zone " + str(i) + "/Parallel Tremor Migrations Zone " + str(i) + ".png")
-        plots.plotMigrationsGeo(migrations, "Geographic Parallel Tremor Migrations Zone " + str(i),
+        frame = plots.plotMigrationsGeo(migrations, "Geographic Parallel Tremor Migrations Zone " + str(i),
             savePath = "../Tremors/images/parallel/migrations/zone " + str(i) + "/geographic/Geographic Parallel Tremor Migrations Zone " + str(i) + ".png")
 
         for migration in migrations:
             plots.plotMigrations([migration], "Parallel Zone " + str(i) + " Migration " + str(migrations.index(migration)),
                 savePath = "../Tremors/images/parallel/migrations/zone " + str(i) + "/linear/Migration " + str(migrations.index(migration)) + ".png")
             plots.plotMigration(migration, "Geographic Parallel Zone " + str(i) + " Migration " + str(migrations.index(migration)), 
+                frame[0], frame[1], frame[2], frame[3], 
                 savePath = "../Tremors/images/parallel/migrations/zone " + str(i) + "/geographic/Migration " + str(migrations.index(migration)) + ".png")
 
         plots.plotZone(procData["parallel"]["dates"][i], procData["parallel"]["distances"][i], 

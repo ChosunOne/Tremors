@@ -292,13 +292,15 @@ def locateMigrations(migrations, distanceThreshold = .01):
             locations += [[migration]]
 
         else:   
+            added = False
             for location in locations:
                 center = sum([x.center[0] for x in location]) / len(location), sum([x.center[1] for x in location]) / len(location)
                 if ((center[0] - migration.center[0])**2 + (center[1] - migration.center[1])**2)**.5 < distanceThreshold:
-                    location += [migration]  
+                    location += [migration]
+                    added = True  
                     break
-                else:
-                    locations += [[migration]]
+            if not added:
+                locations += [[migration]]
     return locations
                 
         
