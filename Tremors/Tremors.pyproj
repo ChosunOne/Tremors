@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>deabd5db-2b2c-4d91-af05-c737030e3bd8</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>Tremors.py</StartupFile>
+    <StartupFile>run.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -39,7 +39,13 @@
     <Compile Include="modules\__init__.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Tremors.py" />
+    <Compile Include="run.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="modules\tremors.py" />
+    <Compile Include="__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Interpreter Include="env\">
@@ -56,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="JMA_2001_2013_Japan.txt" />
+    <Content Include="requirements.txt" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="modules\" />

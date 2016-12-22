@@ -1,10 +1,10 @@
-import modules.analysis as analysis
+import modules.analysis as analysis 
 import modules.plots as plots
 import modules.processing as processing
 import datetime as dt
 import os
 
-def tremors(pattern = "%Y/%m/%d %H:%M:%S", segments = 7, sections = 3, windowSize = 10, startyear = "2004", startdate = "/01/01", 
+def detectMigrations(pattern = "%Y/%m/%d %H:%M:%S", segments = 7, sections = 3, windowSize = 10, startyear = "2004", startdate = "/01/01", 
     endyear = "2004", enddate = "/12/31", datafile = ""):
 
     startTime = dt.datetime.strptime(startyear + startdate + " 00:00:00", pattern)
@@ -23,6 +23,7 @@ def tremors(pattern = "%Y/%m/%d %H:%M:%S", segments = 7, sections = 3, windowSiz
     plots.plotZones(procData["perpendicular"]["latitudes"], procData["perpendicular"]["longitudes"], geoLines, perpGeoLines)
     zones = len(procData["perpendicular"]["dates"])
     for i in range(0, zones):
+        os.system('cls')
         print("Finding perpendicular migrations in zone " + str(i))
         migrations = processing.findMigrations(procData, "perpendicular", windowSize, i)
         #locations = processing.locateMigrations(migrations, .01)
@@ -56,6 +57,7 @@ def tremors(pattern = "%Y/%m/%d %H:%M:%S", segments = 7, sections = 3, windowSiz
 
     zones = len(procData["parallel"]["dates"])
     for i in range(0, zones):
+        os.system('cls')
         print("Finding parallel migrations in zone " + str(i))
         migrations = processing.findMigrations(procData, "parallel", windowSize, i)
 
@@ -85,8 +87,6 @@ def tremors(pattern = "%Y/%m/%d %H:%M:%S", segments = 7, sections = 3, windowSiz
         plots.plotZone(procData["parallel"]["dates"][i], procData["parallel"]["distances"][i], 
             procData["parallel"]["magnitudes"][i], zones, i, "Parallel Tremor Distances Zone " + str(i), 
             "../Tremors/images/parallel/distances/Parallel Tremor Distances Zone " + str(i) + ".png")
-
-tremors(datafile = "2004_Nankai.csv", startdate = '/05/03')
 
 
 
