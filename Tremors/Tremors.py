@@ -2,51 +2,91 @@ import modules.analysis as analysis
 import modules.plots as plots
 import modules.processing as processing
 import datetime as dt
+import os
 
-pattern = "%Y/%m/%d %H:%M:%S"
-segments = 7
-sections = 3
-windowSize = 10
+def tremors(pattern = "%Y/%m/%d %H:%M:%S", segments = 7, sections = 3, windowSize = 10, startyear = "2004", startdate = "/01/01", 
+    endyear = "2004", enddate = "/12/31", datafile = ""):
 
-years = ["2004", "2007"]
+    startTime = dt.datetime.strptime(startyear + startdate + " 00:00:00", pattern)
+    endTime = dt.datetime.strptime(endyear + enddate + " 00:00:00", pattern)
 
-startTime = dt.datetime.strptime(years[0] + "/05/02 00:00:00", pattern)
-endTime = dt.datetime.strptime(years[1] + "/12/31 00:00:00", pattern)
+    print("Reading raw tremor data")
+    data = processing.readTremorData(startTime, endTime, datafile, "%Y-%m-%d %H:%M")
 
-print("Reading raw tremor data")
-data = processing.readTremorData(startTime, endTime, years[0] + "_Nankai.csv", "%Y-%m-%d %H:%M")
+    geoLines = processing.createGeoLines(segments, sections, data)
+    perpGeoLines = processing.createPerpGeoLines(geoLines)
+    procData = processing.processTremorData(data, geoLines, perpGeoLines)
 
-geoLines = processing.createGeoLines(segments, sections, data)
-perpGeoLines = processing.createPerpGeoLines(geoLines)
-procData = processing.processTremorData(data, geoLines, perpGeoLines)
+    if not os.path.exists("../Tremors/images"):
+        os.makedirs("../Tremors/images")
 
-plots.plotZones(procData["perpendicular"]["latitudes"], procData["perpendicular"]["longitudes"], geoLines, perpGeoLines)
-zones = len(procData["perpendicular"]["dates"])
-for i in range(0, zones):
-    print("Finding migrations in zone " + str(i))
-    migrations = processing.findMigrations(procData, "perpendicular", windowSize, i)
-    #locations = processing.locateMigrations(migrations, .01)
+    plots.plotZones(procData["perpendicular"]["latitudes"], procData["perpendicular"]["longitudes"], geoLines, perpGeoLines)
+    zones = len(procData["perpendicular"]["dates"])
+    for i in range(0, zones):
+        print("Finding perpendicular migrations in zone " + str(i))
+        migrations = processing.findMigrations(procData, "perpendicular", windowSize, i)
+        #locations = processing.locateMigrations(migrations, .01)
 
-    plots.plotMigrations(migrations, "Tremor Migrations Zone " + str(i))
-    plots.plotMigrationsGeo(migrations, "Geographic Tremor Migrations Zone " + str(i))
-    for migration in migrations:
-        plots.plotMigrations([migration], "Zone " + str(i) + " Migration " + str(migrations.index(migration)))
+        if not os.path.exists("../Tremors/images/perpendicular/migrations/zone " + str(i)):
+            os.makedirs("../Tremors/images/perpendicular/migrations/zone " + str(i))
 
-    plots.plotZone(procData["perpendicular"]["dates"][i], procData["perpendicular"]["distances"][i], 
-        procData["perpendicular"]["magnitudes"][i], zones, i, "Tremor Distances " + str(i) + " Perp")
+        if not os.path.exists("../Tremors/images/perpendicular/migrations/zone " + str(i) + "/geographic"):
+            os.makedirs("../Tremors/images/perpendicular/migrations/zone " + str(i) + "/geographic")
 
-    plots.plotZone(procData["parallel"]["dates"][i], procData["parallel"]["distances"][i], 
-        procData["parallel"]["magnitudes"][i], zones, i, "Tremor Distances " + str(i) + " Para")
+        if not os.path.exists("../Tremors/images/perpendicular/migrations/zone " + str(i) + "/linear"):
+            os.makedirs("../Tremors/images/perpendicular/migrations/zone " + str(i) + "/linear")
 
-zones = len(procData["parallel"]["dates"])
-for i in range(0, zones):
-    print("Finding migrations in zone " + str(i))
-    migrations = processing.findMigrations(procData, "parallel", windowSize, i)
+        if not os.path.exists("../Tremors/images/perpendicular/distances"):
+            os.makedirs("../Tremors/images/perpendicular/distances")
 
-    plots.plotMigrations(migrations, "Parallel Tremor Migrations Zone " + str(i))
-    for migration in migrations:
-        plots.plotMigrations([migration], "Parallel Zone " + str(i) + " Migration " + str(migrations.index(migration)))
-        plots.plotMigration(migration, "Geographic Parallel Zone " + str(i) + " Migration " + str(migrations.index(migration)))
+        plots.plotMigrations(migrations, "Perpendicular Tremor Migrations Zone " + str(i), 
+            savePath = "../Tremors/images/perpendicular/migrations/zone " + str(i) + "/Perpendicular Tremor Migrations Zone " + str(i) + ".png")
+        plots.plotMigrationsGeo(migrations, "Geographic Perpendicular Tremor Migrations Zone " + str(i),
+            savePath = "../Tremors/images/perpendicular/migrations/zone " + str(i) + "/geographic/Geographic Perpendicular Tremor Migrations Zone " + str(i) + ".png")
+
+        for migration in migrations:
+            plots.plotMigrations([migration], "Perpendicular Zone " + str(i) + " Migration " + str(migrations.index(migration)), 
+                savePath = "../Tremors/images/perpendicular/migrations/zone " + str(i) + "/linear/Migration " + str(migrations.index(migration)) + ".png")
+            plots.plotMigration(migration, "Geographic Perpendicular Zone " + str(i) + " Migration " + str(migrations.index(migration)), 
+                savePath = "../Tremors/images/perpendicular/migrations/zone " + str(i) + "/geographic/Migration " + str(migrations.index(migration)) + ".png")
+
+        plots.plotZone(procData["perpendicular"]["dates"][i], procData["perpendicular"]["distances"][i], 
+            procData["perpendicular"]["magnitudes"][i], zones, i, "Perpendicular Tremor Distances Zone " + str(i),
+            "../Tremors/images/perpendicular/distances/Perpendicular Tremor Distances Zone " + str(i) + ".png")
+
+    zones = len(procData["parallel"]["dates"])
+    for i in range(0, zones):
+        print("Finding parallel migrations in zone " + str(i))
+        migrations = processing.findMigrations(procData, "parallel", windowSize, i)
+
+        if not os.path.exists("../Tremors/images/parallel/migrations/zone " + str(i)):
+            os.makedirs("../Tremors/images/parallel/migrations/zone " + str(i))
+
+        if not os.path.exists("../Tremors/images/parallel/migrations/zone " + str(i) + "/geographic"):
+            os.makedirs("../Tremors/images/parallel/migrations/zone " + str(i) + "/geographic")
+
+        if not os.path.exists("../Tremors/images/parallel/migrations/zone " + str(i) + "/linear"):
+            os.makedirs("../Tremors/images/parallel/migrations/zone " + str(i) + "/linear")
+
+        if not os.path.exists("../Tremors/images/parallel/distances"):
+            os.makedirs("../Tremors/images/parallel/distances")
+
+        plots.plotMigrations(migrations, "Parallel Tremor Migrations Zone " + str(i),
+            savePath = "../Tremors/images/parallel/migrations/zone " + str(i) + "/Parallel Tremor Migrations Zone " + str(i) + ".png")
+        plots.plotMigrationsGeo(migrations, "Geographic Parallel Tremor Migrations Zone " + str(i),
+            savePath = "../Tremors/images/parallel/migrations/zone " + str(i) + "/geographic/Geographic Parallel Tremor Migrations Zone " + str(i) + ".png")
+
+        for migration in migrations:
+            plots.plotMigrations([migration], "Parallel Zone " + str(i) + " Migration " + str(migrations.index(migration)),
+                savePath = "../Tremors/images/parallel/migrations/zone " + str(i) + "/linear/Migration " + str(migrations.index(migration)) + ".png")
+            plots.plotMigration(migration, "Geographic Parallel Zone " + str(i) + " Migration " + str(migrations.index(migration)), 
+                savePath = "../Tremors/images/parallel/migrations/zone " + str(i) + "/geographic/Migration " + str(migrations.index(migration)) + ".png")
+
+        plots.plotZone(procData["parallel"]["dates"][i], procData["parallel"]["distances"][i], 
+            procData["parallel"]["magnitudes"][i], zones, i, "Parallel Tremor Distances Zone " + str(i), 
+            "../Tremors/images/parallel/distances/Parallel Tremor Distances Zone " + str(i) + ".png")
+
+tremors(datafile = "2004_Nankai.csv", startdate = '/05/03')
 
 
 

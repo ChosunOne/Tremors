@@ -3,7 +3,9 @@ import matplotlib.dates as mdates
 import matplotlib.cm as cm
 import numpy as np
 
-def plotZones(latitudes, longitudes, geoLines, perpGeoLines):
+def plotZones(latitudes, longitudes, geoLines, perpGeoLines, savePath = ""):
+    if savePath == "":
+        savePath = "../Tremors/images/zone map.png"
     zones = len(latitudes)
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -24,10 +26,12 @@ def plotZones(latitudes, longitudes, geoLines, perpGeoLines):
         ypd = [perpGeoLines[z].y1, perpGeoLines[z].y2]
         ax.plot(xpd, ypd, color='k', linestyle='-', linewidth=3)
 
-    fig.savefig("../images/zone map.png")
+    fig.savefig(savePath)
     plt.close(fig)
 
-def plotZone(dates, distances, magnitudes, zones, zone, title):
+def plotZone(dates, distances, magnitudes, zones, zone, title, savePath = ""):
+    if savePath == "":
+        savePath = "../Tremors/images/" + title + ".png"
     fig = plt.figure()
     ax = fig.add_subplot(111)
     
@@ -41,10 +45,12 @@ def plotZone(dates, distances, magnitudes, zones, zone, title):
     colors = cm.rainbow(np.linspace(0, 1, zones))
     ax.scatter(dates, distances, color = colors[zone])
 
-    fig.savefig("../images/" + title + ".png")
+    fig.savefig(savePath)
     plt.close(fig)
 
-def plotMigrations(migrations, title):
+def plotMigrations(migrations, title, savePath = ""):
+    if savePath == "":
+        savePath = "../Tremors/images/migrations/" + title + ".png"
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
@@ -59,10 +65,12 @@ def plotMigrations(migrations, title):
     for migration in migrations:
         ax.scatter(migration.eventDates, migration.eventDistances, color = colors[migrations.index(migration)])
 
-    fig.savefig("../images/migrations/" + title +".png")
+    fig.savefig(savePath)
     plt.close(fig)
 
-def plotMigration(migration, title):
+def plotMigration(migration, title, savePath = ""):
+    if savePath == "":
+        savePath = "../Tremors/images/migrations/" + title + ".png"
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
@@ -71,14 +79,15 @@ def plotMigration(migration, title):
     ax.set_ylabel('Latitude')
     ax.set_aspect('equal')
 
-    #ax.plot((migration.origin[1], migration.terminus[1]), (migration.origin[0], migration.terminus[0]))
     colors = cm.rainbow(np.linspace(0, 1, len(migration.eventLongitudes)))
     for x in range(0, len(migration.eventLongitudes)):
         ax.scatter(migration.eventLongitudes[x], migration.eventLatitudes[x], color = colors[x])
-    fig.savefig("../images/migrations/" + title + ".png")
+    fig.savefig(savePath)
     plt.close(fig)
 
-def plotMigrationsGeo(migrations, title):
+def plotMigrationsGeo(migrations, title, savePath = ""):
+    if savePath == "":
+        savePath = "../Tremors/images/migrations/" + title + ".png"
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
@@ -91,5 +100,5 @@ def plotMigrationsGeo(migrations, title):
     for migration in migrations:
         ax.scatter(migration.eventLongitudes, migration.eventLatitudes, color = colors[migrations.index(migration)])
 
-    fig.savefig("../images/migrations/" + title + ".png")
+    fig.savefig(savePath)
     plt.close(fig)

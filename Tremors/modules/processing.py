@@ -38,6 +38,8 @@ def readTremorData(startTime, endTime, file, pattern):
             else:
                 slines = slines[:index]
                 index = int(len(slines) / 2)
+                if len(slines) == 0:
+                    raise Exception("Given start date precedes earliest data")
                 if ".csv" in file:
                     startLine = slines[index].split(",")
                 else:
